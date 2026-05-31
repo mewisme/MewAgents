@@ -1,0 +1,58 @@
+version: 2
+
+project_name: mewagents
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: mewagents
+    main: .
+    binary: mewagents
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X mewagents/internal/version.Version={{.Version}}
+      - -X mewagents/internal/version.Commit={{.Commit}}
+      - -X mewagents/internal/version.Date={{.Date}}
+
+archives:
+  - id: mewagents
+    ids:
+      - mewagents
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  github:
+    owner: mewisme
+    name: MewAgents
+  prerelease: auto

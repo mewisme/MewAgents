@@ -1,4 +1,22 @@
+# Binaries
+/mewagents
+/mewagents.exe
 *.exe
+*.dll
+*.so
+*.dylib
+
+# Build & release
+/bin/
+/dist/
+/build/
+*.test
+*.out
+coverage.*
+*.prof
 *.log
+
+# Goreleaser
+.goreleaser.snapshot.yaml
 
 .cursor/plans/

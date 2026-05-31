@@ -15,16 +15,32 @@ Planned capabilities include inventory, metrics, wake-on-lan, remote terminal, c
 - Go 1.26.3 or later
 - Elevated privileges to install OS services (Administrator on Windows, root on Linux/macOS)
 
-## Build
+## Install
+
+### Releases
+
+Download a binary from [GitHub Releases](https://github.com/mewisme/MewAgents/releases).
+
+Or install with Go:
 
 ```bash
-git clone https://github.com/mewisme/mewagents
-cd mew-agent
-
-go build -o mewagents .
+go install github.com/mewisme/MewAgents@latest
 ```
 
-Cross-compile:
+### Build from source
+
+```bash
+git clone https://github.com/mewisme/MewAgents.git
+cd MewAgents
+
+go build -ldflags="-s -w" -o mewagents .
+```
+
+On Windows with Go 1.26+, use `-ldflags="-s -w"` so the executable runs correctly.
+
+## Cross-compile
+
+Manual cross-compile:
 
 ```bash
 GOOS=linux   GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o mewagents-linux   .
@@ -66,8 +82,24 @@ mewagents uninstall shutdown
 | `install <feature> [flags]` | Validate config, save to disk, register OS service, enable start at boot, and start it |
 | `uninstall <feature>` | Stop and remove the service; config file is retained |
 | `console <feature> [flags]` | Run the feature in the foreground; optional flags override saved config |
+| `version` | Show version, install method, and whether a newer release is available |
+| `update` | Update to the latest GitHub release |
+| `update --check` | Only report if an update is available |
+| `update --force` | Reinstall latest even if already up to date (go install: `-a`, `GOPROXY=direct`) |
 
 Unknown features return a clear error listing all registered features.
+
+### Self-update
+
+`mewagents update` detects how you installed mewagents and picks the right path:
+
+| Install method | Update action |
+|----------------|---------------|
+| **Homebrew** | `brew upgrade mewagents` |
+| **go install** | `go install github.com/mewisme/MewAgents@<release-tag>` (latest GitHub tag) |
+| **Binary** (release download) | Downloads from GitHub Releases and replaces the executable |
+
+`mewagents version` prints build info, install method, and whether a newer release is available.
 
 ## Configuration
 
@@ -143,6 +175,22 @@ go test ./...
 go build .
 ```
 
+## Releases (maintainers)
+
+Tag a version to trigger GoReleaser:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The Release workflow will:
+
+- Build Linux, macOS, and Windows binaries (amd64, arm64, and 386 for Linux/Windows)
+- Publish GitHub release archives and checksums
+
+CI runs tests on push/PR to `main`.
+
 ## Adding a new feature
 
 1. Create `internal/features/<name>/` implementing `registry.Feature`
@@ -165,4 +213,4 @@ No changes are needed to CLI handlers, service management, config, MQTT, or life
 
 ## License
 
-See repository license file.
+MIT — see [LICENSE](LICENSE).

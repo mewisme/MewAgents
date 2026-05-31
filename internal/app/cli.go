@@ -17,6 +17,8 @@ type CLI struct {
 	Install   InstallCmd   `cmd:"" help:"Install a feature as a system service."`
 	Uninstall UninstallCmd `cmd:"" help:"Uninstall a feature service."`
 	Console   ConsoleCmd   `cmd:"" help:"Run a feature in the foreground."`
+	Version   VersionCmd   `cmd:"" help:"Show version, install method, and release status."`
+	Update    UpdateCmd    `cmd:"" help:"Update mewagents to the latest release."`
 	Run       RunCmd       `cmd:"" hidden:"" help:"Internal entry for service manager."`
 }
 
