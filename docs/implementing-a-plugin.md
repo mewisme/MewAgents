@@ -355,7 +355,7 @@ When a user runs `mewagents uninstall <feature>`, the core platform:
 
 ## Reference Implementation
 
-Study the shutdown feature for a complete, production-quality example:
+Study the shutdown feature for a complete, production-quality example. User-facing docs: [Shutdown feature](../features/shutdown.md).
 
 | File | Responsibility |
 |------|----------------|
@@ -415,4 +415,5 @@ Track goroutines with `rt.Lifecycle().Run(ctx, fn)` if you need coordinated shut
 - Feature interface: [`internal/registry/feature.go`](../internal/registry/feature.go)
 - Runtime interfaces: [`internal/registry/runtime.go`](../internal/registry/runtime.go)
 - Working example: [`internal/features/shutdown/`](../internal/features/shutdown/)
+- User documentation: [Shutdown feature](../features/shutdown.md)
 - Architecture plan: [`.cursor/plans/mew_agents_platform_89e47918.plan.md`](../.cursor/plans/mew_agents_platform_89e47918.plan.md)
