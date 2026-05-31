@@ -39,7 +39,7 @@ func (f *Feature) Run(ctx context.Context, rt registry.Runtime, cfg registry.Con
 	defer sweepCancel()
 	go runSweeper(sweepCtx, logger, store)
 
-	topics := buildTopics(macs)
+	topics := subscriptionTopics()
 	conn, err := rt.MQTT().Connect(ctx, registry.MQTTOptions{
 		Feature:  featureName,
 		Broker:   c.URL,
@@ -84,12 +84,11 @@ func (f *Feature) Run(ctx context.Context, rt registry.Runtime, cfg registry.Con
 	return ctx.Err()
 }
 
-func buildTopics(macs []string) []string {
-	topics := make([]string, 0, len(macs)*2)
-	for _, mac := range macs {
-		topics = append(topics, topicForRequest(mac), topicForConfirm(mac))
+func subscriptionTopics() []string {
+	return []string{
+		"shutdown/+",
+		"shutdown/+/confirm",
 	}
-	return topics
 }
 
 func runSweeper(ctx context.Context, logger *slog.Logger, store *pendingStore) {

@@ -36,7 +36,7 @@ type UninstallCmd struct {
 }
 
 type ConsoleCmd struct {
-	Feature string `arg:"" help:"Feature name."`
+	Rest []string `arg:"" passthrough:"" help:"Feature name and optional config flags."`
 }
 
 type RunCmd struct {
@@ -48,7 +48,10 @@ func (c *UninstallCmd) Run(app *App) error {
 }
 
 func (c *ConsoleCmd) Run(app *App) error {
-	return app.handleConsole(c.Feature)
+	if len(c.Rest) == 0 {
+		return fmt.Errorf("feature name is required")
+	}
+	return app.handleConsole(c.Rest[0], c.Rest[1:])
 }
 
 func (c *RunCmd) Run(app *App) error {

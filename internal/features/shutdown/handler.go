@@ -1,17 +1,10 @@
 package shutdown
 
 import (
-	"fmt"
 	"log/slog"
-	"regexp"
 	"strings"
 
 	"mewagents/internal/network"
-)
-
-var (
-	requestTopicPattern = regexp.MustCompile(`^shutdown/([0-9A-F]{12})$`)
-	confirmTopicPattern = regexp.MustCompile(`^shutdown/([0-9A-F]{12})/confirm$`)
 )
 
 type messageHandler struct {
@@ -24,7 +17,11 @@ type messageHandler struct {
 func newMessageHandler(logger *slog.Logger, store *pendingStore, macs []string, shutdownFn func() error) *messageHandler {
 	macSet := make(map[string]struct{}, len(macs))
 	for _, mac := range macs {
-		macSet[mac] = struct{}{}
+		normalized, ok := network.NormalizeMAC(mac)
+		if !ok {
+			continue
+		}
+		macSet[normalized] = struct{}{}
 	}
 	return &messageHandler{
 		logger:   logger,
@@ -35,19 +32,45 @@ func newMessageHandler(logger *slog.Logger, store *pendingStore, macs []string, 
 }
 
 func (h *messageHandler) handleTopic(topic string) {
+	mac, isConfirm, ok := parseShutdownTopic(topic)
+	if !ok {
+		return
+	}
+
+	if isConfirm {
+		h.handleConfirm(mac)
+		return
+	}
+	h.handleRequest(mac)
+}
+
+func parseShutdownTopic(topic string) (normalizedMAC string, isConfirm bool, ok bool) {
 	topic = strings.TrimSpace(topic)
-	if topic == "" {
-		return
+	if !strings.HasPrefix(topic, "shutdown/") {
+		return "", false, false
 	}
 
-	if matches := confirmTopicPattern.FindStringSubmatch(topic); len(matches) == 2 {
-		h.handleConfirm(matches[1])
-		return
+	rest := strings.TrimPrefix(topic, "shutdown/")
+	if rest == "" {
+		return "", false, false
+	}
+	if strings.Count(rest, "/") > 1 || (strings.Contains(rest, "/") && !strings.HasSuffix(rest, "/confirm")) {
+		return "", false, false
 	}
 
-	if matches := requestTopicPattern.FindStringSubmatch(topic); len(matches) == 2 {
-		h.handleRequest(matches[1])
+	isConfirm = strings.HasSuffix(rest, "/confirm")
+	if isConfirm {
+		rest = strings.TrimSuffix(rest, "/confirm")
+		if rest == "" {
+			return "", false, false
+		}
 	}
+
+	normalizedMAC, ok = network.NormalizeMAC(rest)
+	if !ok {
+		return "", false, false
+	}
+	return normalizedMAC, isConfirm, true
 }
 
 func (h *messageHandler) handleRequest(mac string) {
@@ -93,11 +116,3 @@ func (h *messageHandler) isKnownMAC(mac string) bool {
 }
 
 const timeRFC3339 = "2006-01-02T15:04:05Z07:00"
-
-func topicForRequest(mac string) string {
-	return fmt.Sprintf("shutdown/%s", mac)
-}
-
-func topicForConfirm(mac string) string {
-	return fmt.Sprintf("shutdown/%s/confirm", mac)
-}

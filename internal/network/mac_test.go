@@ -27,6 +27,16 @@ func TestNormalizeMAC(t *testing.T) {
 	}
 }
 
+func TestMACTopicVariants(t *testing.T) {
+	variants := network.MACTopicVariants("AABBCCDDEEFF")
+	if len(variants) != 3 {
+		t.Fatalf("expected 3 variants, got %d: %#v", len(variants), variants)
+	}
+	if variants[0] != "AABBCCDDEEFF" || variants[1] != "AA:BB:CC:DD:EE:FF" || variants[2] != "AA-BB-CC-DD-EE-FF" {
+		t.Fatalf("unexpected variants: %#v", variants)
+	}
+}
+
 func TestValidMAC(t *testing.T) {
 	if !network.ValidMAC("AABBCCDDEEFF") {
 		t.Fatal("expected valid mac")

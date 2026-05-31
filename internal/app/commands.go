@@ -15,31 +15,43 @@ func (root *App) resolveFeature(name string) (registry.Feature, error) {
 	return root.Registry.Get(name)
 }
 
+func featureFlagUsage(command, featureName string) string {
+	return fmt.Sprintf("mewagents %s %s", command, featureName)
+}
+
+func (root *App) configFromFlags(feature registry.Feature, command, featureName string, rest []string) (registry.Config, error) {
+	flags := feature.NewInstallFlags()
+	if flags == nil {
+		return nil, fmt.Errorf("feature %q does not support configuration flags", featureName)
+	}
+
+	parser, err := kong.New(flags, kong.Name(featureFlagUsage(command, featureName)))
+	if err != nil {
+		return nil, fmt.Errorf("create flag parser: %w", err)
+	}
+	if _, err := parser.Parse(rest); err != nil {
+		return nil, err
+	}
+
+	cfg, err := feature.ConfigFromInstallFlags(flags)
+	if err != nil {
+		return nil, err
+	}
+	if err := feature.ValidateConfig(cfg); err != nil {
+		return nil, fmt.Errorf("invalid configuration: %w", err)
+	}
+	return cfg, nil
+}
+
 func (root *App) handleInstall(featureName string, rest []string) error {
 	feature, err := root.resolveFeature(featureName)
 	if err != nil {
 		return err
 	}
 
-	flags := feature.NewInstallFlags()
-	if flags == nil {
-		return fmt.Errorf("feature %q does not support installation flags", featureName)
-	}
-
-	parser, err := kong.New(flags)
-	if err != nil {
-		return fmt.Errorf("create install flag parser: %w", err)
-	}
-	if _, err := parser.Parse(rest); err != nil {
-		return err
-	}
-
-	cfg, err := feature.ConfigFromInstallFlags(flags)
+	cfg, err := root.configFromFlags(feature, "install", featureName, rest)
 	if err != nil {
 		return err
-	}
-	if err := feature.ValidateConfig(cfg); err != nil {
-		return fmt.Errorf("invalid configuration: %w", err)
 	}
 
 	if err := root.Runtime.Config().Save(featureName, cfg); err != nil {
@@ -73,18 +85,26 @@ func (root *App) handleUninstall(featureName string) error {
 	return nil
 }
 
-func (root *App) handleConsole(featureName string) error {
+func (root *App) handleConsole(featureName string, rest []string) error {
 	feature, err := root.resolveFeature(featureName)
 	if err != nil {
 		return err
 	}
 
-	cfg := feature.NewConfig()
-	if err := root.Runtime.Config().Load(featureName, cfg); err != nil {
-		return fmt.Errorf("load configuration: %w", err)
-	}
-	if err := feature.ValidateConfig(cfg); err != nil {
-		return fmt.Errorf("invalid configuration: %w", err)
+	var cfg registry.Config
+	if len(rest) > 0 {
+		cfg, err = root.configFromFlags(feature, "console", featureName, rest)
+		if err != nil {
+			return err
+		}
+	} else {
+		cfg = feature.NewConfig()
+		if err := root.Runtime.Config().Load(featureName, cfg); err != nil {
+			return fmt.Errorf("load configuration: %w", err)
+		}
+		if err := feature.ValidateConfig(cfg); err != nil {
+			return fmt.Errorf("invalid configuration: %w", err)
+		}
 	}
 
 	ctx, cancel := root.Runtime.Lifecycle().NotifyContext(root.Runtime.Context())

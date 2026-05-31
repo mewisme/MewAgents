@@ -129,7 +129,7 @@ Use `export_test.go` to expose internals when needed (see shutdown feature).
 gofmt -w .
 go vet ./...
 go test ./internal/features/<name>/...
-go build ./cmd/mewagents
+go build .
 ```
 
 ## Anti-Patterns

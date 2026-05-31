@@ -92,3 +92,45 @@ func ValidMAC(s string) bool {
 	_, ok := NormalizeMAC(s)
 	return ok
 }
+
+// FormatMACColon returns AA:BB:CC:DD:EE:FF for a normalized MAC.
+func FormatMACColon(normalized string) (string, bool) {
+	mac, ok := NormalizeMAC(normalized)
+	if !ok {
+		return "", false
+	}
+	var b strings.Builder
+	for i := 0; i < 6; i++ {
+		if i > 0 {
+			b.WriteByte(':')
+		}
+		b.WriteString(mac[i*2 : i*2+2])
+	}
+	return b.String(), true
+}
+
+// FormatMACHyphen returns AA-BB-CC-DD-EE-FF for a normalized MAC.
+func FormatMACHyphen(normalized string) (string, bool) {
+	colon, ok := FormatMACColon(normalized)
+	if !ok {
+		return "", false
+	}
+	return strings.ReplaceAll(colon, ":", "-"), true
+}
+
+// MACTopicVariants returns MAC strings for MQTT topic segments: plain, colon, hyphen.
+func MACTopicVariants(normalized string) []string {
+	mac, ok := NormalizeMAC(normalized)
+	if !ok {
+		return nil
+	}
+	colon, ok := FormatMACColon(mac)
+	if !ok {
+		return []string{mac}
+	}
+	hyphen, ok := FormatMACHyphen(mac)
+	if !ok {
+		return []string{mac, colon}
+	}
+	return []string{mac, colon, hyphen}
+}

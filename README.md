@@ -18,18 +18,18 @@ Planned capabilities include inventory, metrics, wake-on-lan, remote terminal, c
 ## Build
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/mewisme/mewagents
 cd mew-agent
 
-go build -o mewagents ./cmd/mewagents
+go build -o mewagents .
 ```
 
 Cross-compile:
 
 ```bash
-GOOS=linux   GOARCH=amd64 go build -o mewagents-linux   ./cmd/mewagents
-GOOS=darwin  GOARCH=amd64 go build -o mewagents-darwin  ./cmd/mewagents
-GOOS=windows GOARCH=amd64 go build -o mewagents.exe     ./cmd/mewagents
+GOOS=linux   GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o mewagents-linux   .
+GOOS=darwin  GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o mewagents-darwin  .
+GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o mewagents.exe     .
 ```
 
 ## Usage
@@ -47,6 +47,14 @@ mewagents install shutdown -u mqtt://broker.example.com:1883 -n admin -p secret
 # Run in foreground (Ctrl+C for graceful shutdown)
 mewagents console shutdown
 
+# Run with inline config flags (same flags as install; no config file required)
+mewagents console shutdown \
+  --url mqtt://broker.example.com:1883 \
+  --username admin \
+  --password secret
+
+mewagents console shutdown -u mqtt://broker.example.com:1883 -n admin -p secret
+
 # Remove the service (configuration is kept)
 mewagents uninstall shutdown
 ```
@@ -57,7 +65,7 @@ mewagents uninstall shutdown
 |---------|-------------|
 | `install <feature> [flags]` | Validate config, save to disk, register OS service |
 | `uninstall <feature>` | Stop and remove the service; config file is retained |
-| `console <feature>` | Run the feature in the foreground |
+| `console <feature> [flags]` | Run the feature in the foreground; optional flags override saved config |
 
 Unknown features return a clear error listing all registered features.
 
@@ -82,7 +90,13 @@ shutdown/{MAC}          → creates a pending shutdown request (1-minute TTL)
 shutdown/{MAC}/confirm  → executes shutdown if a valid pending request exists
 ```
 
-MAC addresses are normalized to uppercase hex without separators (`AABBCCDDEEFF`). The feature never shuts down immediately on the first message — confirmation within the TTL window is required. Pending state exists only in memory and is cleared on service restart.
+MAC addresses in topics may use any of these formats (case-insensitive):
+
+- `AABBCCDDEEFF`
+- `AA:BB:CC:DD:EE:FF`
+- `AA-BB-CC-DD-EE-FF`
+
+The agent subscribes to `shutdown/+` and `shutdown/+/confirm`, then handles only messages whose MAC segment matches a detected local interface. Other messages are ignored.
 
 Supported shutdown commands (no shell execution):
 
@@ -95,7 +109,7 @@ Supported shutdown commands (no shell execution):
 ## Architecture
 
 ```
-cmd/mewagents/          Entry point, feature registration
+main.go                 Entry point, feature registration
 internal/
   app/                  CLI, command dispatch, runtime container
   registry/             Feature interface and plugin registry
@@ -125,7 +139,7 @@ go vet ./...
 go test ./...
 
 # Build
-go build ./cmd/mewagents
+go build .
 ```
 
 ## Adding a new feature

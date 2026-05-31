@@ -62,6 +62,49 @@ func TestMessageHandlerExpiredConfirm(t *testing.T) {
 	}
 }
 
+func TestMessageHandlerColonAndHyphenTopics(t *testing.T) {
+	store := NewPendingStoreForTest(time.Minute, time.Now)
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	shutdownCalled := false
+	handler := NewMessageHandlerForTest(logger, store, []string{"AABBCCDDEEFF"}, func() error {
+		shutdownCalled = true
+		return nil
+	})
+
+	handler.HandleTopic("shutdown/AA:BB:CC:DD:EE:FF")
+	handler.HandleTopic("shutdown/AA-BB-CC-DD-EE-FF/confirm")
+	if !shutdownCalled {
+		t.Fatal("expected shutdown when request and confirm use different mac formats")
+	}
+
+	shutdownCalled = false
+	handler.HandleTopic("shutdown/aa-bb-cc-dd-ee-ff")
+	handler.HandleTopic("shutdown/AABBCCDDEEFF/confirm")
+	if !shutdownCalled {
+		t.Fatal("expected shutdown with lowercase hyphen request and plain confirm")
+	}
+}
+
+func TestMessageHandlerInvalidTopicSegment(t *testing.T) {
+	store := NewPendingStoreForTest(time.Minute, time.Now)
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	shutdownCalled := false
+	handler := NewMessageHandlerForTest(logger, store, []string{"AABBCCDDEEFF"}, func() error {
+		shutdownCalled = true
+		return nil
+	})
+
+	handler.HandleTopic("shutdown/not-a-mac")
+	handler.HandleTopic("shutdown/not-a-mac/confirm")
+	handler.HandleTopic("shutdown/too/deep/topic")
+
+	if shutdownCalled {
+		t.Fatal("expected invalid topic segments to be ignored")
+	}
+}
+
 func TestMessageHandlerUnknownMAC(t *testing.T) {
 	store := NewPendingStoreForTest(time.Minute, time.Now)
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))

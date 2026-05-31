@@ -47,7 +47,11 @@ func (f *DefaultFactory) Connect(ctx context.Context, opts registry.MQTTOptions)
 		SessionExpiryInterval:         3600,
 		OnConnectionUp:                opts.OnUp,
 		OnConnectError: func(err error) {
-			opts.Logger.Warn("mqtt connection error", "broker", RedactedURL(opts.Broker), "error", err)
+			msg := "mqtt connection error"
+			if isMQTTAuthError(err) {
+				msg = "mqtt authentication failed (verify username/password; in PowerShell use single quotes for passwords containing $)"
+			}
+			opts.Logger.Warn(msg, "broker", RedactedURL(opts.Broker), "error", err)
 		},
 		ClientConfig: paho.ClientConfig{
 			ClientID: clientID,
@@ -65,6 +69,12 @@ func (f *DefaultFactory) Connect(ctx context.Context, opts registry.MQTTOptions)
 	if opts.Username != "" {
 		cfg.SetUsernamePassword(opts.Username, []byte(opts.Password))
 	}
+
+	opts.Logger.Info("mqtt connecting",
+		"broker", RedactedURL(opts.Broker),
+		"username", opts.Username,
+		"password_len", len(opts.Password),
+	)
 
 	cm, err := autopaho.NewConnection(ctx, cfg)
 	if err != nil {
