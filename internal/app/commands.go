@@ -1,0 +1,116 @@
+package app
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/alecthomas/kong"
+
+	"mewagents/internal/registry"
+)
+
+func (root *App) resolveFeature(name string) (registry.Feature, error) {
+	return root.Registry.Get(name)
+}
+
+func (root *App) handleInstall(featureName string, rest []string) error {
+	feature, err := root.resolveFeature(featureName)
+	if err != nil {
+		return err
+	}
+
+	flags := feature.NewInstallFlags()
+	if flags == nil {
+		return fmt.Errorf("feature %q does not support installation flags", featureName)
+	}
+
+	parser, err := kong.New(flags)
+	if err != nil {
+		return fmt.Errorf("create install flag parser: %w", err)
+	}
+	if _, err := parser.Parse(rest); err != nil {
+		return err
+	}
+
+	cfg, err := feature.ConfigFromInstallFlags(flags)
+	if err != nil {
+		return err
+	}
+	if err := feature.ValidateConfig(cfg); err != nil {
+		return fmt.Errorf("invalid configuration: %w", err)
+	}
+
+	if err := root.Runtime.Config().Save(featureName, cfg); err != nil {
+		return fmt.Errorf("save configuration: %w", err)
+	}
+
+	executable, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("resolve executable: %w", err)
+	}
+
+	if err := root.Runtime.Service().Install(root.Runtime.Context(), feature, filepath.Clean(executable)); err != nil {
+		return err
+	}
+
+	root.Runtime.Logger().Info("feature installed", "feature", featureName, "service", feature.DefaultServiceName())
+	return nil
+}
+
+func (root *App) handleUninstall(featureName string) error {
+	feature, err := root.resolveFeature(featureName)
+	if err != nil {
+		return err
+	}
+
+	if err := root.Runtime.Service().Uninstall(root.Runtime.Context(), feature); err != nil {
+		return err
+	}
+
+	root.Runtime.Logger().Info("feature uninstalled", "feature", featureName, "service", feature.DefaultServiceName())
+	return nil
+}
+
+func (root *App) handleConsole(featureName string) error {
+	feature, err := root.resolveFeature(featureName)
+	if err != nil {
+		return err
+	}
+
+	cfg := feature.NewConfig()
+	if err := root.Runtime.Config().Load(featureName, cfg); err != nil {
+		return fmt.Errorf("load configuration: %w", err)
+	}
+	if err := feature.ValidateConfig(cfg); err != nil {
+		return fmt.Errorf("invalid configuration: %w", err)
+	}
+
+	ctx, cancel := root.Runtime.Lifecycle().NotifyContext(root.Runtime.Context())
+	defer cancel()
+
+	rt := root.Runtime.WithContext(ctx, cancel)
+	root.Runtime.Logger().Info("starting feature in console mode", "feature", featureName)
+
+	if err := feature.Run(ctx, rt, cfg); err != nil && ctx.Err() == nil {
+		return err
+	}
+	return nil
+}
+
+func (root *App) handleRun(featureName string) error {
+	feature, err := root.resolveFeature(featureName)
+	if err != nil {
+		return err
+	}
+
+	run := func(ctx context.Context, rt registry.Runtime, cfg registry.Config) error {
+		if err := feature.ValidateConfig(cfg); err != nil {
+			return fmt.Errorf("invalid configuration: %w", err)
+		}
+		return feature.Run(ctx, rt, cfg)
+	}
+
+	return root.Runtime.Service().Run(root.Runtime.Context(), feature, root.Runtime, run)
+}
