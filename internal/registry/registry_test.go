@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"mewagents/internal/registry"
+	"github.com/mewisme/MewAgents/internal/registry"
 )
 
 type stubFeature struct {

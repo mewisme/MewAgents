@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"mewagents/internal/platform"
+	"github.com/mewisme/MewAgents/internal/platform"
 )
 
 // Manager loads and saves per-feature configuration.

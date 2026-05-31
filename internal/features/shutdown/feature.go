@@ -3,8 +3,8 @@ package shutdown
 import (
 	"fmt"
 
-	"mewagents/internal/mqtt"
-	"mewagents/internal/registry"
+	"github.com/mewisme/MewAgents/internal/mqtt"
+	"github.com/mewisme/MewAgents/internal/registry"
 )
 
 const featureName = "shutdown"

@@ -31,7 +31,7 @@ import (
     "context"
     "fmt"
 
-    "mewagents/internal/registry"
+    "github.com/mewisme/MewAgents/internal/registry"
 )
 
 const featureName = "myfeature"
@@ -117,8 +117,8 @@ import (
     "github.com/eclipse/paho.golang/autopaho"
     "github.com/eclipse/paho.golang/paho"
 
-    "mewagents/internal/mqtt"
-    "mewagents/internal/registry"
+    "github.com/mewisme/MewAgents/internal/mqtt"
+    "github.com/mewisme/MewAgents/internal/registry"
 )
 
 func (f *Feature) Run(ctx context.Context, rt registry.Runtime, cfg registry.Config) error {

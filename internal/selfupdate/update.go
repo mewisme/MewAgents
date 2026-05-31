@@ -17,7 +17,7 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"mewagents/internal/version"
+	"github.com/mewisme/MewAgents/internal/version"
 )
 
 const goInstallModule = "github.com/mewisme/MewAgents"

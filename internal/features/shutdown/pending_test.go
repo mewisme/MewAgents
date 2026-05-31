@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	. "mewagents/internal/features/shutdown"
+	. "github.com/mewisme/MewAgents/internal/features/shutdown"
 )
 
 func TestPendingStoreConfirmFlow(t *testing.T) {

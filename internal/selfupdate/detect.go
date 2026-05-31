@@ -94,10 +94,7 @@ func detectGoInstall() bool {
 		return false
 	}
 	path := bi.Main.Path
-	if path == "github.com/mewisme/MewAgents" || strings.HasPrefix(path, "github.com/mewisme/MewAgents/") {
-		return true
-	}
-	if path != "mewagents" {
+	if path != "github.com/mewisme/MewAgents" && !strings.HasPrefix(path, "github.com/mewisme/MewAgents/") {
 		return false
 	}
 	ver := bi.Main.Version

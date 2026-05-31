@@ -264,7 +264,7 @@ import (
     "context"
     "fmt"
 
-    "mewagents/internal/registry"
+    "github.com/mewisme/MewAgents/internal/registry"
 )
 
 const featureName = "inventory"

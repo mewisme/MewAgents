@@ -12,7 +12,7 @@ import (
 	"github.com/eclipse/paho.golang/autopaho"
 	"github.com/eclipse/paho.golang/paho"
 
-	"mewagents/internal/registry"
+	"github.com/mewisme/MewAgents/internal/registry"
 )
 
 // DefaultFactory creates autopaho connection managers.

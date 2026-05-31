@@ -1,4 +1,4 @@
-module mewagents
+module github.com/mewisme/MewAgents
 
 go 1.26.3
 

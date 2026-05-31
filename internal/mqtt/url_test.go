@@ -3,7 +3,7 @@ package mqtt_test
 import (
 	"testing"
 
-	"mewagents/internal/mqtt"
+	"github.com/mewisme/MewAgents/internal/mqtt"
 )
 
 func TestParseBrokerURL(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"mewagents/internal/mqtt"
+	"github.com/mewisme/MewAgents/internal/mqtt"
 )
 
 // Config holds shutdown feature configuration.

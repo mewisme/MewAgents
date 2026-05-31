@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"mewagents/internal/network"
+	"github.com/mewisme/MewAgents/internal/network"
 )
 
 type topicAction int

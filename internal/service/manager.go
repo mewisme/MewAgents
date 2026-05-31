@@ -9,7 +9,7 @@ import (
 
 	kardianos "github.com/kardianos/service"
 
-	"mewagents/internal/registry"
+	"github.com/mewisme/MewAgents/internal/registry"
 )
 
 // Manager controls OS service lifecycle for features.

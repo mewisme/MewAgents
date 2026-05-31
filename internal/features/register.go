@@ -1,8 +1,8 @@
 package features
 
 import (
-	"mewagents/internal/features/shutdown"
-	"mewagents/internal/registry"
+	"github.com/mewisme/MewAgents/internal/features/shutdown"
+	"github.com/mewisme/MewAgents/internal/registry"
 )
 
 // RegisterAll registers built-in features with the registry.

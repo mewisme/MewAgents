@@ -1,6 +1,6 @@
 package app
 
-import "mewagents/internal/selfupdate"
+import "github.com/mewisme/MewAgents/internal/selfupdate"
 
 type UpdateCmd struct {
 	Check bool `help:"Only report if an update is available." name:"check"`

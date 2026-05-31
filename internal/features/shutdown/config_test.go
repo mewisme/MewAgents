@@ -3,7 +3,7 @@ package shutdown_test
 import (
 	"testing"
 
-	. "mewagents/internal/features/shutdown"
+	. "github.com/mewisme/MewAgents/internal/features/shutdown"
 )
 
 func TestConfigValidate(t *testing.T) {
