@@ -88,6 +88,7 @@ The shutdown feature listens on MQTT topics derived from the machine's active ne
 ```
 shutdown/{MAC}          → creates a pending shutdown request (1-minute TTL)
 shutdown/{MAC}/confirm  → executes shutdown if a valid pending request exists
+shutdown/{MAC}/cancel   → removes a pending request without shutting down
 ```
 
 MAC addresses in topics may use any of these formats (case-insensitive):
@@ -96,7 +97,7 @@ MAC addresses in topics may use any of these formats (case-insensitive):
 - `AA:BB:CC:DD:EE:FF`
 - `AA-BB-CC-DD-EE-FF`
 
-The agent subscribes to `shutdown/+` and `shutdown/+/confirm`, then handles only messages whose MAC segment matches a detected local interface. Other messages are ignored.
+The agent subscribes to `shutdown/+`, `shutdown/+/confirm`, and `shutdown/+/cancel`, then handles only messages whose MAC segment matches a detected local interface. Other messages are ignored. Payload is ignored (topic-only protocol).
 
 Supported shutdown commands (no shell execution):
 

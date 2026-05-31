@@ -86,6 +86,36 @@ func TestMessageHandlerColonAndHyphenTopics(t *testing.T) {
 	}
 }
 
+func TestMessageHandlerCancel(t *testing.T) {
+	store := NewPendingStoreForTest(time.Minute, time.Now)
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	shutdownCalled := false
+	handler := NewMessageHandlerForTest(logger, store, []string{"AABBCCDDEEFF"}, func() error {
+		shutdownCalled = true
+		return nil
+	})
+
+	handler.HandleTopic("shutdown/AABBCCDDEEFF")
+	handler.HandleTopic("shutdown/AABBCCDDEEFF/cancel")
+	handler.HandleTopic("shutdown/AABBCCDDEEFF/confirm")
+
+	if shutdownCalled {
+		t.Fatal("expected shutdown to be blocked after cancel")
+	}
+}
+
+func TestMessageHandlerCancelWithoutPending(t *testing.T) {
+	store := NewPendingStoreForTest(time.Minute, time.Now)
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	handler := NewMessageHandlerForTest(logger, store, []string{"AABBCCDDEEFF"}, func() error {
+		return errors.New("should not shutdown")
+	})
+
+	handler.HandleTopic("shutdown/AA-BB-CC-DD-EE-FF/cancel")
+}
+
 func TestMessageHandlerInvalidTopicSegment(t *testing.T) {
 	store := NewPendingStoreForTest(time.Minute, time.Now)
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))

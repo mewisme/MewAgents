@@ -7,6 +7,14 @@ import (
 	"mewagents/internal/network"
 )
 
+type topicAction int
+
+const (
+	topicActionRequest topicAction = iota
+	topicActionConfirm
+	topicActionCancel
+)
+
 type messageHandler struct {
 	logger   *slog.Logger
 	store    *pendingStore
@@ -32,45 +40,54 @@ func newMessageHandler(logger *slog.Logger, store *pendingStore, macs []string, 
 }
 
 func (h *messageHandler) handleTopic(topic string) {
-	mac, isConfirm, ok := parseShutdownTopic(topic)
+	mac, action, ok := parseShutdownTopic(topic)
 	if !ok {
 		return
 	}
 
-	if isConfirm {
+	switch action {
+	case topicActionConfirm:
 		h.handleConfirm(mac)
-		return
+	case topicActionCancel:
+		h.handleCancel(mac)
+	default:
+		h.handleRequest(mac)
 	}
-	h.handleRequest(mac)
 }
 
-func parseShutdownTopic(topic string) (normalizedMAC string, isConfirm bool, ok bool) {
+func parseShutdownTopic(topic string) (normalizedMAC string, action topicAction, ok bool) {
 	topic = strings.TrimSpace(topic)
 	if !strings.HasPrefix(topic, "shutdown/") {
-		return "", false, false
+		return "", 0, false
 	}
 
 	rest := strings.TrimPrefix(topic, "shutdown/")
 	if rest == "" {
-		return "", false, false
-	}
-	if strings.Count(rest, "/") > 1 || (strings.Contains(rest, "/") && !strings.HasSuffix(rest, "/confirm")) {
-		return "", false, false
+		return "", 0, false
 	}
 
-	isConfirm = strings.HasSuffix(rest, "/confirm")
-	if isConfirm {
-		rest = strings.TrimSuffix(rest, "/confirm")
+	action = topicActionRequest
+	if strings.Contains(rest, "/") {
+		switch {
+		case strings.HasSuffix(rest, "/confirm"):
+			action = topicActionConfirm
+			rest = strings.TrimSuffix(rest, "/confirm")
+		case strings.HasSuffix(rest, "/cancel"):
+			action = topicActionCancel
+			rest = strings.TrimSuffix(rest, "/cancel")
+		default:
+			return "", 0, false
+		}
 		if rest == "" {
-			return "", false, false
+			return "", 0, false
 		}
 	}
 
 	normalizedMAC, ok = network.NormalizeMAC(rest)
 	if !ok {
-		return "", false, false
+		return "", 0, false
 	}
-	return normalizedMAC, isConfirm, true
+	return normalizedMAC, action, true
 }
 
 func (h *messageHandler) handleRequest(mac string) {
@@ -103,6 +120,21 @@ func (h *messageHandler) handleConfirm(mac string) {
 		if err := h.shutdown(); err != nil {
 			h.logger.Error("shutdown command failed", "mac", mac, "error", err)
 		}
+	}
+}
+
+func (h *messageHandler) handleCancel(mac string) {
+	if !h.isKnownMAC(mac) {
+		h.logger.Warn("ignored shutdown cancel for unknown mac", "mac", mac)
+		return
+	}
+
+	result, req := h.store.cancel(mac)
+	switch result {
+	case cancelMissing:
+		h.logger.Info("ignored shutdown cancel without pending request", "mac", mac)
+	case cancelRemoved:
+		h.logger.Info("shutdown request cancelled", "mac", mac, "was_expires_at", req.expiresAt.UTC().Format(timeRFC3339))
 	}
 }
 

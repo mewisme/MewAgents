@@ -9,7 +9,13 @@ const (
 	ConfirmExecuted = confirmExecuted
 	ConfirmMissing  = confirmMissing
 	ConfirmExpired  = confirmExpired
+
+	CancelRemoved = cancelRemoved
+	CancelMissing = cancelMissing
 )
+
+// CancelResult describes the outcome of a shutdown cancel attempt.
+type CancelResult = cancelResult
 
 // PendingRequest exposes pending request metadata for tests.
 type PendingRequest struct {
@@ -41,6 +47,15 @@ func (s *PendingStoreTest) Create(mac string) PendingRequest {
 
 func (s *PendingStoreTest) Confirm(mac string) (ConfirmResult, PendingRequest) {
 	result, req := s.store.confirm(mac)
+	return result, PendingRequest{
+		MAC:       req.mac,
+		CreatedAt: req.createdAt,
+		ExpiresAt: req.expiresAt,
+	}
+}
+
+func (s *PendingStoreTest) Cancel(mac string) (CancelResult, PendingRequest) {
+	result, req := s.store.cancel(mac)
 	return result, PendingRequest{
 		MAC:       req.mac,
 		CreatedAt: req.createdAt,

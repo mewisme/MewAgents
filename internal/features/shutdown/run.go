@@ -88,6 +88,7 @@ func subscriptionTopics() []string {
 	return []string{
 		"shutdown/+",
 		"shutdown/+/confirm",
+		"shutdown/+/cancel",
 	}
 }
 

@@ -72,6 +72,25 @@ func (s *pendingStore) confirm(mac string) (confirmResult, pendingRequest) {
 	return confirmExecuted, req
 }
 
+type cancelResult int
+
+const (
+	cancelRemoved cancelResult = iota
+	cancelMissing
+)
+
+func (s *pendingStore) cancel(mac string) (cancelResult, pendingRequest) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	req, ok := s.requests[mac]
+	if !ok {
+		return cancelMissing, pendingRequest{}
+	}
+	delete(s.requests, mac)
+	return cancelRemoved, req
+}
+
 func (s *pendingStore) sweep() int {
 	s.mu.Lock()
 	defer s.mu.Unlock()

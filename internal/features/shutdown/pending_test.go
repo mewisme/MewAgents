@@ -49,6 +49,27 @@ func TestPendingStoreExpiredConfirm(t *testing.T) {
 	}
 }
 
+func TestPendingStoreCancel(t *testing.T) {
+	store := NewPendingStoreForTest(time.Minute, time.Now)
+
+	store.Create("AABBCCDDEEFF")
+
+	result, _ := store.Cancel("AABBCCDDEEFF")
+	if result != CancelRemoved {
+		t.Fatalf("expected cancel removed, got %v", result)
+	}
+
+	result, _ = store.Cancel("AABBCCDDEEFF")
+	if result != CancelMissing {
+		t.Fatalf("expected cancel missing, got %v", result)
+	}
+
+	confirmResult, _ := store.Confirm("AABBCCDDEEFF")
+	if confirmResult != ConfirmMissing {
+		t.Fatalf("expected confirm missing after cancel, got %v", confirmResult)
+	}
+}
+
 func TestPendingStoreConcurrentAccess(t *testing.T) {
 	store := NewPendingStoreForTest(time.Minute, time.Now)
 	var wg sync.WaitGroup
