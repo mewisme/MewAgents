@@ -63,7 +63,7 @@ mewagents uninstall shutdown
 
 | Command | Description |
 |---------|-------------|
-| `install <feature> [flags]` | Validate config, save to disk, register OS service |
+| `install <feature> [flags]` | Validate config, save to disk, register OS service, enable start at boot, and start it |
 | `uninstall <feature>` | Stop and remove the service; config file is retained |
 | `console <feature> [flags]` | Run the feature in the foreground; optional flags override saved config |
 

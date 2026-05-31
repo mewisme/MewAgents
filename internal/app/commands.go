@@ -67,7 +67,7 @@ func (root *App) handleInstall(featureName string, rest []string) error {
 		return err
 	}
 
-	root.Runtime.Logger().Info("feature installed", "feature", featureName, "service", feature.DefaultServiceName())
+	root.Runtime.Logger().Info("feature installed and started", "feature", featureName, "service", feature.DefaultServiceName())
 	return nil
 }
 

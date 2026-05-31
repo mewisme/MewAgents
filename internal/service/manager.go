@@ -29,12 +29,23 @@ func NewManager() *DefaultManager {
 }
 
 func (m *DefaultManager) serviceConfig(feature registry.Feature, executable string) *kardianos.Config {
+	options := make(kardianos.KeyValue)
+	// Windows: SERVICE_AUTO_START (string key from kardianos/service Windows backend)
+	options["StartType"] = "automatic"
+	// macOS launchd: start when the job is loaded at boot
+	options["RunAtLoad"] = true
+
 	return &kardianos.Config{
 		Name:        feature.DefaultServiceName(),
 		DisplayName: feature.DefaultDisplayName(),
 		Description: feature.Description(),
 		Executable:  executable,
 		Arguments:   []string{"run", feature.Name()},
+		Dependencies: []string{
+			"After=network-online.target",
+			"Wants=network-online.target",
+		},
+		Option: options,
 	}
 }
 
@@ -57,6 +68,9 @@ func (m *DefaultManager) Install(ctx context.Context, feature registry.Feature, 
 	}
 	if err := svc.Install(); err != nil {
 		return fmt.Errorf("install service %q: %w", feature.DefaultServiceName(), err)
+	}
+	if err := svc.Start(); err != nil {
+		return fmt.Errorf("start service %q: %w", feature.DefaultServiceName(), err)
 	}
 	return nil
 }
