@@ -52,6 +52,8 @@ GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o mewagents.exe  
 
 ```bash
 mewagents install <feature> [flags]
+mewagents start <feature>
+mewagents stop <feature>
 mewagents console <feature> [flags]
 mewagents uninstall <feature>
 ```
@@ -64,6 +66,8 @@ See [Features](#features) for per-feature setup, flags, and protocol details.
 |---------|-------------|
 | `install <feature> [flags]` | Validate config, save to disk, register OS service, enable start at boot, and start it |
 | `uninstall <feature>` | Stop and remove the service; config file is retained |
+| `start <feature>` | Start an installed feature service |
+| `stop <feature>` | Stop a running feature service |
 | `console <feature> [flags]` | Run the feature in the foreground; optional flags override saved config |
 | `version` | Show version, install method, and whether a newer release is available |
 | `update` | Update to the latest GitHub release |

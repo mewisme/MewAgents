@@ -16,6 +16,8 @@ type App struct {
 type CLI struct {
 	Install   InstallCmd   `cmd:"" help:"Install a feature as a system service."`
 	Uninstall UninstallCmd `cmd:"" help:"Uninstall a feature service."`
+	Start     StartCmd     `cmd:"" help:"Start an installed feature service."`
+	Stop      StopCmd      `cmd:"" help:"Stop a running feature service."`
 	Console   ConsoleCmd   `cmd:"" help:"Run a feature in the foreground."`
 	Version   VersionCmd   `cmd:"" help:"Show version, install method, and release status."`
 	Update    UpdateCmd    `cmd:"" help:"Update mewagents to the latest release."`
@@ -37,6 +39,14 @@ type UninstallCmd struct {
 	Feature string `arg:"" help:"Feature name."`
 }
 
+type StartCmd struct {
+	Feature string `arg:"" help:"Feature name."`
+}
+
+type StopCmd struct {
+	Feature string `arg:"" help:"Feature name."`
+}
+
 type ConsoleCmd struct {
 	Rest []string `arg:"" passthrough:"" help:"Feature name and optional config flags."`
 }
@@ -47,6 +57,14 @@ type RunCmd struct {
 
 func (c *UninstallCmd) Run(app *App) error {
 	return app.handleUninstall(c.Feature)
+}
+
+func (c *StartCmd) Run(app *App) error {
+	return app.handleStart(c.Feature)
+}
+
+func (c *StopCmd) Run(app *App) error {
+	return app.handleStop(c.Feature)
 }
 
 func (c *ConsoleCmd) Run(app *App) error {

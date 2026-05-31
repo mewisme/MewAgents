@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	kardianos "github.com/kardianos/service"
@@ -16,6 +18,7 @@ import (
 type Manager interface {
 	Install(ctx context.Context, feature registry.Feature, executable string) error
 	Uninstall(ctx context.Context, feature registry.Feature) error
+	Start(ctx context.Context, feature registry.Feature) error
 	Stop(ctx context.Context, feature registry.Feature) error
 	Run(ctx context.Context, feature registry.Feature, rt registry.Runtime, run func(context.Context, registry.Runtime, registry.Config) error) error
 }
@@ -36,16 +39,26 @@ func (m *DefaultManager) serviceConfig(feature registry.Feature, executable stri
 	options["RunAtLoad"] = true
 
 	return &kardianos.Config{
-		Name:        feature.DefaultServiceName(),
-		DisplayName: feature.DefaultDisplayName(),
-		Description: feature.Description(),
-		Executable:  executable,
-		Arguments:   []string{"run", feature.Name()},
-		Dependencies: []string{
-			"After=network-online.target",
-			"Wants=network-online.target",
-		},
-		Option: options,
+		Name:         feature.DefaultServiceName(),
+		DisplayName:  feature.DefaultDisplayName(),
+		Description:  feature.Description(),
+		Executable:   executable,
+		Arguments:    []string{"run", feature.Name()},
+		Dependencies: serviceDependencies(),
+		Option:       options,
+	}
+}
+
+// serviceDependencies returns OS-specific service dependencies.
+// On Linux these are systemd [Unit] lines. On Windows, kardianos passes
+// Dependencies to SCM as service names — do not use systemd syntax there.
+func serviceDependencies() []string {
+	if runtime.GOOS != "linux" {
+		return nil
+	}
+	return []string{
+		"After=network-online.target",
+		"Wants=network-online.target",
 	}
 }
 
@@ -65,6 +78,9 @@ func (m *DefaultManager) Install(ctx context.Context, feature registry.Feature, 
 	svc, err := m.newService(feature, executable, &noopProgram{})
 	if err != nil {
 		return fmt.Errorf("create service: %w", err)
+	}
+	if err := m.removeIfInstalled(svc); err != nil {
+		return err
 	}
 	if err := svc.Install(); err != nil {
 		return fmt.Errorf("install service %q: %w", feature.DefaultServiceName(), err)
@@ -101,25 +117,72 @@ func (m *DefaultManager) Uninstall(ctx context.Context, feature registry.Feature
 	return nil
 }
 
+func (m *DefaultManager) removeIfInstalled(svc kardianos.Service) error {
+	_, err := svc.Status()
+	if err != nil {
+		if errors.Is(err, kardianos.ErrNotInstalled) {
+			return nil
+		}
+		return fmt.Errorf("check service status: %w", err)
+	}
+	if err := svc.Stop(); err != nil {
+		// Service may not be running; continue with removal.
+		_ = err
+	}
+	if err := svc.Uninstall(); err != nil {
+		return fmt.Errorf("remove existing service: %w", err)
+	}
+	return nil
+}
+
+// Start starts an installed feature service.
+func (m *DefaultManager) Start(ctx context.Context, feature registry.Feature) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	svc, err := m.controlService(feature)
+	if err != nil {
+		return err
+	}
+	if _, err := svc.Status(); err != nil {
+		if errors.Is(err, kardianos.ErrNotInstalled) {
+			return fmt.Errorf("service %q is not installed; run: mewagents install %s", feature.DefaultServiceName(), feature.Name())
+		}
+		return fmt.Errorf("check service status: %w", err)
+	}
+	if err := svc.Start(); err != nil {
+		return fmt.Errorf("start service %q: %w", feature.DefaultServiceName(), err)
+	}
+	return nil
+}
+
 // Stop stops a running feature service.
 func (m *DefaultManager) Stop(ctx context.Context, feature registry.Feature) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
 
-	executable, err := currentExecutable()
+	svc, err := m.controlService(feature)
 	if err != nil {
 		return err
-	}
-
-	svc, err := m.newService(feature, executable, &noopProgram{})
-	if err != nil {
-		return fmt.Errorf("create service: %w", err)
 	}
 	if err := svc.Stop(); err != nil {
 		return fmt.Errorf("stop service %q: %w", feature.DefaultServiceName(), err)
 	}
 	return nil
+}
+
+func (m *DefaultManager) controlService(feature registry.Feature) (kardianos.Service, error) {
+	executable, err := currentExecutable()
+	if err != nil {
+		return nil, err
+	}
+	svc, err := m.newService(feature, executable, &noopProgram{})
+	if err != nil {
+		return nil, fmt.Errorf("create service: %w", err)
+	}
+	return svc, nil
 }
 
 // Run executes a feature under the OS service manager.

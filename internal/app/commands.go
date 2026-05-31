@@ -85,6 +85,34 @@ func (root *App) handleUninstall(featureName string) error {
 	return nil
 }
 
+func (root *App) handleStart(featureName string) error {
+	feature, err := root.resolveFeature(featureName)
+	if err != nil {
+		return err
+	}
+
+	if err := root.Runtime.Service().Start(root.Runtime.Context(), feature); err != nil {
+		return err
+	}
+
+	root.Runtime.Logger().Info("feature service started", "feature", featureName, "service", feature.DefaultServiceName())
+	return nil
+}
+
+func (root *App) handleStop(featureName string) error {
+	feature, err := root.resolveFeature(featureName)
+	if err != nil {
+		return err
+	}
+
+	if err := root.Runtime.Service().Stop(root.Runtime.Context(), feature); err != nil {
+		return err
+	}
+
+	root.Runtime.Logger().Info("feature service stopped", "feature", featureName, "service", feature.DefaultServiceName())
+	return nil
+}
+
 func (root *App) handleConsole(featureName string, rest []string) error {
 	feature, err := root.resolveFeature(featureName)
 	if err != nil {

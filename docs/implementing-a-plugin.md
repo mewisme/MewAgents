@@ -318,6 +318,10 @@ Once registered, your feature is available immediately:
 # Install as OS service (validates config, saves config.json, registers service)
 mewagents install <feature> [flags]
 
+# Start or stop the installed OS service
+mewagents start <feature>
+mewagents stop <feature>
+
 # Remove service (config file is kept)
 mewagents uninstall <feature>
 

@@ -21,6 +21,7 @@ type ConfigManager interface {
 type ServiceManager interface {
 	Install(ctx context.Context, feature Feature, executable string) error
 	Uninstall(ctx context.Context, feature Feature) error
+	Start(ctx context.Context, feature Feature) error
 	Stop(ctx context.Context, feature Feature) error
 	Run(ctx context.Context, feature Feature, rt Runtime, run func(context.Context, Runtime, Config) error) error
 }
