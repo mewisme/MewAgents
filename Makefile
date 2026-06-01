@@ -50,7 +50,7 @@ help:
 	@echo "  make web-dev          Start dev server"
 	@echo "  make web-build        Production build"
 	@echo "  make web-lint         Run ESLint"
-	@echo "  make web-docker-build Build Docker image (WEB_IMAGE=$(WEB_IMAGE))"
+	@echo "  make web-dc           Run Docker compose"
 
 agents-build:
 	cd $(AGENTS_DIR) && go build -ldflags="-s -w" -o mewagents .
@@ -96,5 +96,5 @@ web-build:
 web-lint:
 	cd $(WEB_DIR) && pnpm lint
 
-web-docker-build:
-	docker build -t $(WEB_IMAGE) -f $(WEB_DIR)/Dockerfile $(WEB_DIR)
+web-dc:
+	docker compose -f $(WEB_DIR)/docker-compose.yml up -d
