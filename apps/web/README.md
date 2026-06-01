@@ -44,18 +44,19 @@ Build args (`VITE_MQTT_*`) are baked in at image build time. Override via `docke
 
 ### GitHub Container Registry
 
-CI (`.github/workflows/web-docker.yml`) pushes on `main` and `v*` tags:
+CI (`.github/workflows/web-release.yml`) runs on git tags `v*` and pushes:
 
 ```text
-ghcr.io/<owner>/<repo>/web:latest
-ghcr.io/<owner>/<repo>/web:<sha>
-ghcr.io/<owner>/<repo>/web:<semver>   # on version tags
+ghcr.io/<owner>/<repo>/mew-agents-web:latest      # always on each release
+ghcr.io/<owner>/<repo>/mew-agents-web:v1.0.0      # matches the Git tag
+ghcr.io/<owner>/<repo>/mew-agents-web:1.0.0       # semver (no v prefix)
 ```
 
 ```bash
+git tag v1.0.0 && git push origin v1.0.0
 docker login ghcr.io
-docker pull ghcr.io/<owner>/<repo>/web:latest
-docker run --rm -p 8080:80 ghcr.io/<owner>/<repo>/web:latest
+docker pull ghcr.io/<owner>/<repo>/mew-agents-web:v1.0.0
+docker run --rm -p 8080:80 ghcr.io/<owner>/<repo>/mew-agents-web:latest
 ```
 
 For private repositories, use a GitHub PAT with `read:packages` when logging in.

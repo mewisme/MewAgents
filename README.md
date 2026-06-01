@@ -28,35 +28,6 @@ make web-dev
 make web-docker-build
 ```
 
-Agent install, CLI usage, configuration, and releases: **[apps/agents/README.md](apps/agents/README.md)**.
-
-### Web Docker image (GHCR)
-
-On push to `main` or version tags `v*`, CI builds and pushes:
-
-`ghcr.io/<owner>/<repo>/web`
-
-Examples: `latest` on `main`, `sha-<commit>` on every push, semver tags on `v*` releases.
-
-Pull (after the workflow has run at least once):
-
-```bash
-docker pull ghcr.io/<owner>/<repo>/web:latest
-docker run --rm -p 8080:80 ghcr.io/<owner>/<repo>/web:latest
-```
-
-Replace `<owner>/<repo>` with your GitHub repository (e.g. `mewisme/mew-agents`). Package visibility follows the repo; for private repos, authenticate with `docker login ghcr.io` using a PAT with `read:packages`.
-
-Build args for MQTT defaults can be set at image build time — see [apps/web/Dockerfile](apps/web/Dockerfile) and [apps/web/docker-compose.yml](apps/web/docker-compose.yml).
-
-Firmware (ESP-IDF on Windows): `make fw-set-target fw-build` (loads Espressif PowerShell profile automatically). See **[apps/firmware/README.md](apps/firmware/README.md)**.
-
-## Adding a feature plugin
-
-1. Read [apps/agents/docs/implementing-a-plugin.md](apps/agents/docs/implementing-a-plugin.md)
-2. Use the [mewagents-feature-plugin](.cursor/skills/mewagents-feature-plugin/) Cursor skill for the full workflow
-3. Reference implementation: `apps/agents/internal/features/shutdown/`
-
 ## Make targets
 
 | Target | Description |
@@ -75,8 +46,6 @@ Firmware (ESP-IDF on Windows): `make fw-set-target fw-build` (loads Espressif Po
 | `fw-flash` | Flash device (`PORT=COMx` optional) |
 
 Run `make help` for the full list.
-
-CI also publishes `ghcr.io/<owner>/<repo>/web` — see **Web Docker image (GHCR)** above.
 
 ## License
 

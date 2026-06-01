@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      image: ghcr.io/mewisme/mewagents/mew-agents-web:c87085d
       args:
         VITE_MQTT_URI: ${VITE_MQTT_URI:-}
         VITE_MQTT_USERNAME: ${VITE_MQTT_USERNAME:-}
