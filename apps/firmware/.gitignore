@@ -1,0 +1,38 @@
+# ESP-IDF build
+build/
+sdkconfig
+sdkconfig.*
+
+# Managed components & lockfile
+managed_components/
+dependencies.lock
+
+# Cache & logs
+.cache/
+*.log
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.venv/
+venv/
+env/
+
+# IDE / editor
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project flash defaults (16 MB boards)
+!sdkconfig.defaults
+Kconfig

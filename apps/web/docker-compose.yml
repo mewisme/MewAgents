@@ -1,0 +1,17 @@
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_MQTT_URI: ${VITE_MQTT_URI:-}
+        VITE_MQTT_USERNAME: ${VITE_MQTT_USERNAME:-}
+        VITE_MQTT_PASSWORD: ${VITE_MQTT_PASSWORD:-}
+        VITE_MQTT_CLIENT_ID: ${VITE_MQTT_CLIENT_ID:-}
+        VITE_MQTT_AUTO_RECONNECT: ${VITE_MQTT_AUTO_RECONNECT:-true}
+    container_name: wol-ui
+    ports:
+      - "${UI_PORT:-8080}:80"
+    restart: unless-stopped
+    env_file:
+      - .env

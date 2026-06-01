@@ -1,0 +1,35 @@
+# Agents (Go)
+apps/agents/mewagents
+apps/agents/mewagents.exe
+apps/agents/*.exe
+apps/agents/bin/
+apps/agents/dist/
+apps/agents/build/
+apps/agents/*.test
+apps/agents/*.out
+apps/agents/coverage.*
+apps/agents/*.prof
+apps/agents/.goreleaser.snapshot.yaml
+
+# Web (Node)
+apps/web/node_modules/
+apps/web/dist/
+
+# Firmware (ESP-IDF)
+apps/firmware/build/
+apps/firmware/sdkconfig
+apps/firmware/sdkconfig.*
+!apps/firmware/sdkconfig.defaults
+apps/firmware/managed_components/
+apps/firmware/dependencies.lock
+apps/firmware/.cache/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+# Cursor plans (local)
+.cursor/plans/

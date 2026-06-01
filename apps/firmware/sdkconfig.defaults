@@ -1,0 +1,5 @@
+# Match common ESP32-S3 modules with 16 MB external flash (silences spi_flash size warning).
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+
+# TLS/MQTT init needs more than default main task stack.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192

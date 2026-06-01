@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wakeup-result.schema.json",
+  "title": "Wakeup Result",
+  "description": "MQTT payload published to wakeup/{mac}/result after a wake attempt",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "error"
+      ],
+      "description": "sent if magic packet was sent, error otherwise"
+    },
+    "mac": {
+      "type": "string",
+      "description": "Target MAC address (canonical AA:BB:CC:DD:EE:FF)"
+    },
+    "broadcast": {
+      "type": "string",
+      "description": "Subnet broadcast IP used for the magic packet"
+    },
+    "message": {
+      "type": "string",
+      "description": "Optional error detail when status is error"
+    }
+  },
+  "required": [
+    "status",
+    "mac",
+    "broadcast"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,53 @@
+menu "WOL Service"
+
+config WIFI_SSID
+    string "Wi-Fi SSID"
+    default ""
+    help
+        SSID of the Wi-Fi AP to connect to.
+
+config WIFI_PASSWORD
+    string "Wi-Fi Password"
+    default ""
+    help
+        Password for the Wi-Fi AP.
+
+config MQTT_URI
+    string "MQTT Broker URI"
+    default ""
+    help
+        Full URI of the MQTT broker (e.g. mqtts://host:8883 for TLS).
+
+config MQTT_USERNAME
+    string "MQTT Username"
+    default ""
+    help
+        Username for MQTT broker authentication.
+
+config MQTT_PASSWORD
+    string "MQTT Password"
+    default ""
+    help
+        Password for MQTT broker authentication.
+
+config TARGET_MAC
+    string "Default target PC MAC (optional fallback)"
+    default ""
+    help
+        Fallback MAC if wakeup topic has no MAC segment. Colons, hyphens, or none (e.g. AA:BB:CC:DD:EE:FF, AA-BB-CC-DD-EE-FF, AABBCCDDEEFF).
+
+config WOL_UDP_PORT
+    int "WOL UDP port"
+    default 9
+    range 1 65535
+    help
+        UDP port for Wake-on-LAN (default 9).
+
+config REDIS_URL
+    string "Redis URL (empty = disabled)"
+    default ""
+    help
+        redis://host:6379 (plain) or rediss://username:password@host:6379 (TLS, e.g. Upstash).
+        Recent MACs from wakeup topics are stored automatically in Redis list mac:recents.
+
+endmenu
