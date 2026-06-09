@@ -31,8 +31,22 @@ func (f *Feature) Run(ctx context.Context, rt registry.Runtime, cfg registry.Con
 	logger.Info("detected active mac addresses", "macs", macs)
 
 	store := newPendingStore(defaultPendingTTL)
+
+	var conn *autopaho.ConnectionManager
 	handler := newMessageHandler(logger, store, macs, func() error {
 		return rt.Platform().Shutdown(ctx)
+	}, func(normalizedMAC string) error {
+		if conn == nil {
+			return fmt.Errorf("mqtt not connected")
+		}
+		publishCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_, err := conn.Publish(publishCtx, &paho.Publish{
+			Topic:   pingOKTopic(normalizedMAC),
+			Payload: pingResultPayload(normalizedMAC),
+			QoS:     1,
+		})
+		return err
 	})
 
 	sweepCtx, sweepCancel := context.WithCancel(ctx)
@@ -40,7 +54,7 @@ func (f *Feature) Run(ctx context.Context, rt registry.Runtime, cfg registry.Con
 	go runSweeper(sweepCtx, logger, store)
 
 	topics := subscriptionTopics()
-	conn, err := rt.MQTT().Connect(ctx, registry.MQTTOptions{
+	conn, err = rt.MQTT().Connect(ctx, registry.MQTTOptions{
 		Feature:  featureName,
 		Broker:   c.URL,
 		Username: c.Username,
@@ -89,6 +103,8 @@ func subscriptionTopics() []string {
 		"shutdown/+",
 		"shutdown/+/confirm",
 		"shutdown/+/cancel",
+		"ping/+",
+		"ping/+/ok",
 	}
 }
 

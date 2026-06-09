@@ -16,13 +16,14 @@ const (
 )
 
 type messageHandler struct {
-	logger   *slog.Logger
-	store    *pendingStore
-	macs     map[string]struct{}
-	shutdown func() error
+	logger      *slog.Logger
+	store       *pendingStore
+	macs        map[string]struct{}
+	shutdown    func() error
+	publishPing func(normalizedMAC string) error
 }
 
-func newMessageHandler(logger *slog.Logger, store *pendingStore, macs []string, shutdownFn func() error) *messageHandler {
+func newMessageHandler(logger *slog.Logger, store *pendingStore, macs []string, shutdownFn func() error, publishPingFn func(normalizedMAC string) error) *messageHandler {
 	macSet := make(map[string]struct{}, len(macs))
 	for _, mac := range macs {
 		normalized, ok := network.NormalizeMAC(mac)
@@ -32,14 +33,22 @@ func newMessageHandler(logger *slog.Logger, store *pendingStore, macs []string, 
 		macSet[normalized] = struct{}{}
 	}
 	return &messageHandler{
-		logger:   logger,
-		store:    store,
-		macs:     macSet,
-		shutdown: shutdownFn,
+		logger:      logger,
+		store:       store,
+		macs:        macSet,
+		shutdown:    shutdownFn,
+		publishPing: publishPingFn,
 	}
 }
 
 func (h *messageHandler) handleTopic(topic string) {
+	if mac, isOK, ok := parsePingTopic(topic); ok {
+		if !isOK {
+			h.handlePing(mac)
+		}
+		return
+	}
+
 	mac, action, ok := parseShutdownTopic(topic)
 	if !ok {
 		return
@@ -88,6 +97,22 @@ func parseShutdownTopic(topic string) (normalizedMAC string, action topicAction,
 		return "", 0, false
 	}
 	return normalizedMAC, action, true
+}
+
+func (h *messageHandler) handlePing(mac string) {
+	if !h.isKnownMAC(mac) {
+		h.logger.Warn("ignored ping for unknown mac", "mac", mac)
+		return
+	}
+	if h.publishPing == nil {
+		h.logger.Warn("ignored ping without publisher", "mac", mac)
+		return
+	}
+	if err := h.publishPing(mac); err != nil {
+		h.logger.Error("ping ok publish failed", "mac", mac, "error", err)
+		return
+	}
+	h.logger.Info("ping ok published", "mac", mac, "topic", pingOKTopic(mac))
 }
 
 func (h *messageHandler) handleRequest(mac string) {
