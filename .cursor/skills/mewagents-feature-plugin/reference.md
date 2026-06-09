@@ -1,6 +1,6 @@
 # Mew Agents Feature Plugin — Reference
 
-Filesystem paths below are monorepo-relative (`apps/agents/...`). Go **import paths** use the module path `github.com/mewisme/MewAgents/internal/...`.
+Filesystem paths below are monorepo-relative (`apps/agents/...`). Go **import paths** use the module path `github.com/mewisme/MewAgents/apps/agents/internal/...`.
 
 ## registry.Feature Interface
 
@@ -33,7 +33,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/mewisme/MewAgents/internal/registry"
+    "github.com/mewisme/MewAgents/apps/agents/internal/registry"
 )
 
 const featureName = "myfeature"
@@ -119,8 +119,8 @@ import (
     "github.com/eclipse/paho.golang/autopaho"
     "github.com/eclipse/paho.golang/paho"
 
-    "github.com/mewisme/MewAgents/internal/mqtt"
-    "github.com/mewisme/MewAgents/internal/registry"
+    "github.com/mewisme/MewAgents/apps/agents/internal/mqtt"
+    "github.com/mewisme/MewAgents/apps/agents/internal/registry"
 )
 
 func (f *Feature) Run(ctx context.Context, rt registry.Runtime, cfg registry.Config) error {

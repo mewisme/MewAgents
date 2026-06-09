@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mewisme/MewAgents/internal/network"
+	"github.com/mewisme/MewAgents/apps/agents/internal/network"
 )
 
 func parsePingTopic(topic string) (normalizedMAC string, isOK bool, ok bool) {

@@ -26,7 +26,7 @@ Download a binary from [GitHub Releases](https://github.com/mewisme/MewAgents/re
 Or install with Go:
 
 ```bash
-go install github.com/mewisme/MewAgents@latest
+go install github.com/mewisme/MewAgents/apps/agents@latest
 ```
 
 ### Build from source
@@ -85,7 +85,7 @@ Unknown features return a clear error listing all registered features.
 | Install method | Update action |
 |----------------|---------------|
 | **Homebrew** | `brew upgrade mewagents` |
-| **go install** | `go install github.com/mewisme/MewAgents@<release-tag>` (latest GitHub tag) |
+| **go install** | `go install github.com/mewisme/MewAgents/apps/agents@<release-tag>` (latest GitHub tag) |
 | **Binary** (release download) | Downloads from GitHub Releases and replaces the executable |
 
 `mewagents version` prints build info, install method, and whether a newer release is available.

@@ -22,9 +22,9 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/mewisme/MewAgents/internal/version.Version={{.Version}}
-      - -X github.com/mewisme/MewAgents/internal/version.Commit={{.Commit}}
-      - -X github.com/mewisme/MewAgents/internal/version.Date={{.Date}}
+      - -X github.com/mewisme/MewAgents/apps/agents/internal/version.Version={{.Version}}
+      - -X github.com/mewisme/MewAgents/apps/agents/internal/version.Commit={{.Commit}}
+      - -X github.com/mewisme/MewAgents/apps/agents/internal/version.Date={{.Date}}
 
 archives:
   - id: mewagents

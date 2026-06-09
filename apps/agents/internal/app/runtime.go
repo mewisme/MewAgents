@@ -4,14 +4,14 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/mewisme/MewAgents/internal/config"
-	"github.com/mewisme/MewAgents/internal/lifecycle"
-	"github.com/mewisme/MewAgents/internal/logging"
-	"github.com/mewisme/MewAgents/internal/mqtt"
-	"github.com/mewisme/MewAgents/internal/network"
-	"github.com/mewisme/MewAgents/internal/platform"
-	"github.com/mewisme/MewAgents/internal/registry"
-	servicemgr "github.com/mewisme/MewAgents/internal/service"
+	"github.com/mewisme/MewAgents/apps/agents/internal/config"
+	"github.com/mewisme/MewAgents/apps/agents/internal/lifecycle"
+	"github.com/mewisme/MewAgents/apps/agents/internal/logging"
+	"github.com/mewisme/MewAgents/apps/agents/internal/mqtt"
+	"github.com/mewisme/MewAgents/apps/agents/internal/network"
+	"github.com/mewisme/MewAgents/apps/agents/internal/platform"
+	"github.com/mewisme/MewAgents/apps/agents/internal/registry"
+	servicemgr "github.com/mewisme/MewAgents/apps/agents/internal/service"
 )
 
 // Runtime is the dependency container for feature execution.

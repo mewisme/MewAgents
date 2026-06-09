@@ -3,7 +3,7 @@ package network_test
 import (
 	"testing"
 
-	"github.com/mewisme/MewAgents/internal/network"
+	"github.com/mewisme/MewAgents/apps/agents/internal/network"
 )
 
 func TestNormalizeMAC(t *testing.T) {

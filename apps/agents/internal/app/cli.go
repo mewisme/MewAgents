@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 
-	"github.com/mewisme/MewAgents/internal/registry"
+	"github.com/mewisme/MewAgents/apps/agents/internal/registry"
 )
 
 // App holds shared dependencies for CLI command handlers.

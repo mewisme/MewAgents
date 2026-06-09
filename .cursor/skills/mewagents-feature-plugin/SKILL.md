@@ -21,12 +21,12 @@ The Go module lives under `apps/agents/` (not the repo root). Filesystem paths b
 
 | Path | Purpose |
 |------|---------|
-| `apps/agents/` | Go module root (`github.com/mewisme/MewAgents`) |
+| `apps/agents/` | Go module root (`github.com/mewisme/MewAgents/apps/agents`) |
 | `apps/agents/internal/features/<name>/` | Feature package |
 | `apps/agents/internal/features/register.go` | Registration |
 | `apps/agents/internal/features/shutdown/` | Reference implementation |
 
-**Import paths** in new Go code stay `github.com/mewisme/MewAgents/internal/...` (module path, not `apps/agents/...`).
+**Import paths** in new Go code use `github.com/mewisme/MewAgents/apps/agents/internal/...` (module path, not filesystem `apps/agents/...`).
 
 ## Reference Implementation
 

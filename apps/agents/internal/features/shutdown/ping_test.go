@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/mewisme/MewAgents/internal/features/shutdown"
+	. "github.com/mewisme/MewAgents/apps/agents/internal/features/shutdown"
 )
 
 func TestParsePingTopic(t *testing.T) {

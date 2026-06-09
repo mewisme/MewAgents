@@ -9,7 +9,7 @@ import (
 	"github.com/eclipse/paho.golang/autopaho"
 	"github.com/eclipse/paho.golang/paho"
 
-	"github.com/mewisme/MewAgents/internal/registry"
+	"github.com/mewisme/MewAgents/apps/agents/internal/registry"
 )
 
 // Run executes the shutdown feature runtime.

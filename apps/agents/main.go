@@ -7,9 +7,9 @@ import (
 
 	"github.com/alecthomas/kong"
 
-	"github.com/mewisme/MewAgents/internal/app"
-	"github.com/mewisme/MewAgents/internal/features"
-	"github.com/mewisme/MewAgents/internal/registry"
+	"github.com/mewisme/MewAgents/apps/agents/internal/app"
+	"github.com/mewisme/MewAgents/apps/agents/internal/features"
+	"github.com/mewisme/MewAgents/apps/agents/internal/registry"
 )
 
 func main() {

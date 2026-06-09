@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mewisme/MewAgents/internal/selfupdate"
-	"github.com/mewisme/MewAgents/internal/version"
+	"github.com/mewisme/MewAgents/apps/agents/internal/selfupdate"
+	"github.com/mewisme/MewAgents/apps/agents/internal/version"
 )
 
 type VersionCmd struct{}

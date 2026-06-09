@@ -17,10 +17,10 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"github.com/mewisme/MewAgents/internal/version"
+	"github.com/mewisme/MewAgents/apps/agents/internal/version"
 )
 
-const goInstallModule = "github.com/mewisme/MewAgents"
+const goInstallModule = "github.com/mewisme/MewAgents/apps/agents"
 
 // CheckResult describes whether a newer release exists.
 type CheckResult struct {

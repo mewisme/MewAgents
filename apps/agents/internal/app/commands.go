@@ -8,7 +8,7 @@ import (
 
 	"github.com/alecthomas/kong"
 
-	"github.com/mewisme/MewAgents/internal/registry"
+	"github.com/mewisme/MewAgents/apps/agents/internal/registry"
 )
 
 func (root *App) resolveFeature(name string) (registry.Feature, error) {
